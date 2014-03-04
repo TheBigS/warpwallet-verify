@@ -1,0 +1,49 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.6
+version = '1.0'
+
+repositories {
+    mavenCentral()
+    maven {
+      url "http://nexus.bitcoinj.org/content/repositories/releases"
+    }
+}
+
+dependencies {
+    compile group: "com.lambdaworks", name: "scrypt", version: "1.4.0"
+    compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+jar {
+    manifest {
+        def manifestClasspath = configurations.runtime.collect { it.getName() }.join(' ')
+        attributes 'Implementation-Title': 'Warp Wallet Verification', 
+                   'Implementation-Version': version,
+                   'Main-Class' : 'warp.wallet.verify.bitcoin.VerifyBitcoin',
+                   'Class-Path': manifestClasspath
+    }
+}
+
+
+
+task copyDepLibs(type: Copy) {
+    into "$buildDir/libs"
+    from configurations.compile
+}
+
+test {
+    systemProperties 'property': 'value'
+}
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs 'repos'
+       }
+    }
+}
+
+build.dependsOn copyDepLibs
